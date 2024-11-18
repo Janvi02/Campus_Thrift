@@ -1,187 +1,116 @@
-/* General Dashboard Container */
 .dashboard-container {
-  width: 80%;
-  margin: 2rem auto;
-  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #f4f4f4;
+  min-height: 100vh;
 }
 
-/* Warning Message */
 .status-warning {
-  background-color: #ffdddd;
-  color: #d9534f;
+  background-color: #ffcc00;
   padding: 10px;
-  margin-bottom: 20px;
   border-radius: 5px;
   text-align: center;
 }
 
-.status-warning span {
-  color: #d9534f;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-/* Dashboard Tabs */
 .dashboard-tabs {
+  margin-top: 20px;
   display: flex;
-  border-bottom: 2px solid #ddd;
-  margin-bottom: 20px;
+  justify-content: space-around;
 }
 
 .tab {
   padding: 10px 20px;
-  cursor: pointer;
-  background-color: #f8f9fa;
+  background-color: #ddd;
   border: none;
-  outline: none;
+  cursor: pointer;
 }
 
 .tab.active {
-  border-bottom: 3px solid #007bff;
-  color: #007bff;
-  font-weight: bold;  /* Bold active tab */
+  background-color: #007bff;
+  color: white;
 }
 
-/* Dashboard Content (Profile + Listings) */
 .dashboard-content {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
+  margin-top: 20px;
 }
 
-/* Profile Info Section */
 .profile-info {
-  flex: 1;
-  min-width: 300px;
-  background-color: #f8f9fa;
+  background-color: white;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-/* Profile Picture Section */
+
 .profile-picture {
   display: flex;
-  flex-direction: column;  /* Stack the image and the text vertically */
-  justify-content: center; /* Center the items horizontally */
-  align-items: center;     /* Center the items vertically */
+  justify-content: center;
+  align-items: center;
   margin-bottom: 20px;
-  height: 200px;           /* Ensure there's enough height for vertical centering */
 }
 
-/* Profile Picture Image */
 .profile-picture img {
   width: 150px;
   height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 10px; /* Add some space between the image and the "Choose file" text */
 }
 
-/* Choose File Text Section */
-.choose-file-text {
-  font-size: 14px; /* Adjust the font size if necessary */
-  color: #007bff;  /* Optional: change color of text */
-  cursor: pointer; /* Indicate that it's clickable */
+.file-upload-container {
+  display: flex;
+  justify-content: center; /* Center the button horizontally */
+  align-items: center;     /* Center the button vertically */
+  margin-top: 10px;        /* Space between image and button */
 }
 
-
-
-
-/* Profile Details Inputs */
-.profile-details input {
-  display: block;
-  width: 100%;
-  padding: 8px;
-  margin: 10px 0;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-}
-
-/* Edit Profile Button */
-.edit-profile-btn {
-  padding: 10px;
+.file-upload-container label {
+  padding: 10px 20px;
   background-color: #007bff;
   color: white;
-  border: none;
-  border-radius: 5px;
   cursor: pointer;
-  margin-top: 10px;
+  border-radius: 5px;
+  text-align: center;
 }
 
-.edit-profile-btn:hover {
-  background-color: #0056b3;
+.file-upload-container input[type="file"] {
+  display: none; /* Hide the default file input */
 }
 
-/* User Listings Section */
+.profile-details {
+  margin-top: 20px;
+}
+
+.profile-details input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
 .user-listings {
-  flex: 2;
-  min-width: 400px;
-  background-color: #f8f9fa;
+  background-color: white;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Listings Container */
 .listings-container {
-  display: grid;
-  gap: 15px;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));  /* Responsive grid */
+  margin-top: 20px;
 }
 
-/* Individual Listing Item */
 .listing-item {
-  padding: 15px;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);  /* Adding subtle shadow for depth */
-}
-
-/* Listing Title */
-.listing-item h3 {
+  padding: 10px;
+  border: 1px solid #ccc;
   margin-bottom: 10px;
-  font-size: 1.2rem;
-}
-
-/* Listing Action Buttons */
-.listing-actions button {
-  margin-right: 10px;
-  padding: 5px 10px;
-  background-color: #6c757d;
-  color: white;
-  border: none;
   border-radius: 5px;
-  cursor: pointer;
 }
 
-.listing-actions button:hover {
-  background-color: #5a6268;
+h2, h3, h4 {
+  margin: 10px 0;
 }
 
-/* 'Action' Button (Primary) */
-.listing-actions button:last-child {
-  background-color: #28a745;
-}
 
-.listing-actions button:last-child:hover {
-  background-color: #218838;
-}
 
-/* Responsive Styling */
-@media (max-width: 768px) {
-  .dashboard-container {
-    width: 95%;
-  }
-  
-  .dashboard-content {
-    flex-direction: column;
-  }
 
-  .profile-info, .user-listings {
-    min-width: 100%;
-  }
 
-  .listings-container {
-    grid-template-columns: 1fr;  /* Stack listings on small screens */
-  }
-}
 

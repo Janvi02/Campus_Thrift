@@ -1,11 +1,11 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../contextStore/AuthContext';
+import { useAuth } from '../../contextStore/AuthContext';  // Correct import of useAuth hook
 import './CreatePost.css';
 
 function CreatePost() {
     const navigate = useNavigate();
-    const { user } = useContext(AuthContext);
+    const { user } = useAuth(); // Directly use useAuth hook instead of useContext
     const [formData, setFormData] = useState({
         name: '',
         category: '',
@@ -133,4 +133,4 @@ function CreatePost() {
     );
 }
 
-export default CreatePost; 
+export default CreatePost;

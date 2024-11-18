@@ -8,26 +8,18 @@ import SearchIcon from "../../assets/SearchIcon";
 import Arrow from "../../assets/Arrow";
 import SellButton from "../../assets/SellButton";
 import SellButtonPlus from "../../assets/SellButtonPlus";
-
-import { AuthContext } from "../../contextStore/AuthContext";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase";
 
 import Search from "../Search/Search";
-import AccountDropdown from '../AccountDropdown'; // Importing the AccountDropdown component
-import { signOut } from "firebase/auth"; // Importing signOut from Firebase Auth
-import { auth } from "../../firebase"; // Ensure you have Firebase initialized
+import AccountDropdown from '../AccountDropdown';
 
 function Header() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { allPost } = useContext(AllPostContext);
-
-  const { setPostContent } = useContext(PostContext);// Firebase Auth user context
-  const navigate = useNavigate();
-  
-
   const { setPostContent } = useContext(PostContext);
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
-
+  
   const [filteredData, setFilteredData] = useState([]);
   const [wordEntered, setWordEntered] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false); // State for dropdown visibility
@@ -71,12 +63,10 @@ function Header() {
     } catch (error) {
       console.error("Error logging out:", error);
     }
-  const handleSellClick = () => {
-    navigate('/create'); // Open the post ad form directly
   };
 
-  const handleLoginClick = () => {
-    navigate('/login');
+  const handleSellClick = () => {
+    navigate('/create'); // Open the post ad form directly
   };
 
   return (
@@ -129,7 +119,6 @@ function Header() {
         {/* User Account & Dropdown */}
         <div className="loginPage">
           {user ? (
-
             <div className="userMenu" onClick={() => setDropdownOpen(!dropdownOpen)}>
               <span>Welcome, {user.displayName || "User"}</span>
               <Arrow />
@@ -144,9 +133,6 @@ function Header() {
                 </div>
               )}
             </div>
-
-            <span>{user.displayName}</span>
-
           ) : (
             <Link to="/login">
               <span>Login</span>
@@ -154,7 +140,6 @@ function Header() {
           )}
           <hr />
         </div>
-
 
         {/* Sell Button */}
         <Link to="/create">
@@ -164,13 +149,15 @@ function Header() {
               <SellButtonPlus />
               <span>SELL</span>
             </div>
+          </div>
+        </Link>
 
+        {/* Sell Menu with onClick */}
         <div className="sellMenu" onClick={handleSellClick}>
           <SellButton />
           <div className="sellMenuContent">
             <SellButtonPlus />
             <span>SELL</span>
-
           </div>
         </div>
       </div>
@@ -179,4 +166,3 @@ function Header() {
 }
 
 export default Header;
-

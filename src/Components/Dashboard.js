@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
-import { auth, db } from '../firebase'; // Adjust this path based on your project structure
+import { auth, db } from '../firebase'; // Import Firebase configuration
 
 const Dashboard = () => {
   const [user, setUser] = useState({
@@ -8,8 +8,9 @@ const Dashboard = () => {
     name: '',
     email: '',
     contact: '',
-    address: '',
-    university: '',
+    institute: '',
+    state: '',
+    city: '',
     verified: false,
   });
 
@@ -19,17 +20,29 @@ const Dashboard = () => {
     bought: [],
   });
 
-  const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('profile'); // State to track the active tab
+  const [profilePic, setProfilePic] = useState(null); // State for the profile picture
 
+  // Use useEffect to fetch data when the component mounts
   useEffect(() => {
+    // Function to fetch user data from Firestore
     const fetchUserData = async () => {
-      const userId = auth.currentUser?.uid; // Get current user's ID from Firebase auth
+      const userId = auth.currentUser?.uid; // Get the current user's ID from Firebase auth
       if (userId) {
         try {
-          const userDoc = await db.collection('users').doc(userId).get();
+          const userDoc = await db.collection('users').doc(userId).get(); // Get user document
           if (userDoc.exists) {
-            setUser(userDoc.data());
+            const userData = userDoc.data();
+            setUser({
+              profilePicture: userData.profilePicture || '',
+              name: userData.name || '',
+              email: userData.email || '',
+              contact: userData.contact || '',
+              institute: userData.institute || '',
+              state: userData.state || '',
+              city: userData.city || '',
+              verified: userData.verified || false,
+            });
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -37,21 +50,42 @@ const Dashboard = () => {
       }
     };
 
+    // Function to fetch user's listings data from Firestore
     const fetchUserListings = async () => {
       const userId = auth.currentUser?.uid;
       if (userId) {
         try {
-          // Fetch Active Listings
-          const activeSnapshot = await db.collection('listings').where('userId', '==', userId).where('status', '==', 'Available').get();
-          const activeListings = activeSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          // Fetch active listings
+          const activeSnapshot = await db
+            .collection('listings')
+            .where('userId', '==', userId)
+            .where('status', '==', 'Available')
+            .get();
+          const activeListings = activeSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
-          // Fetch Sold Listings
-          const soldSnapshot = await db.collection('listings').where('userId', '==', userId).where('status', '==', 'Sold').get();
-          const soldListings = soldSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          // Fetch sold listings
+          const soldSnapshot = await db
+            .collection('listings')
+            .where('userId', '==', userId)
+            .where('status', '==', 'Sold')
+            .get();
+          const soldListings = soldSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
-          // Fetch Bought Listings
-          const boughtSnapshot = await db.collection('purchases').where('buyerId', '==', userId).get();
-          const boughtListings = boughtSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          // Fetch bought listings
+          const boughtSnapshot = await db
+            .collection('purchases')
+            .where('buyerId', '==', userId)
+            .get();
+          const boughtListings = boughtSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
           setListings({
             active: activeListings,
@@ -66,33 +100,23 @@ const Dashboard = () => {
 
     fetchUserData();
     fetchUserListings();
-  }, []);
+  }, []); // Empty dependency array to run on mount only
 
-  const handleEditProfile = () => {
-    setIsEditing(true);
-  };
-
-  const handleSaveProfile = () => {
-    setIsEditing(false);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-  };
-
-  const handleProfilePictureChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setUser({ ...user, profilePicture: URL.createObjectURL(file) });
-    }
-  };
-
+  // Handle tab change
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
 
-  const handleListingAction = (id, action) => {
-    alert(`${action} action on listing ID: ${id}`);
+  // Handle file upload
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePic(reader.result); // Set the profile picture in state
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -103,6 +127,7 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Tab navigation */}
       <div className="dashboard-tabs">
         <button
           className={`tab ${activeTab === 'profile' ? 'active' : ''}`}
@@ -124,79 +149,42 @@ const Dashboard = () => {
         </button>
       </div>
 
+      {/* Display user data based on active tab */}
       <div className="dashboard-content">
         {activeTab === 'profile' && (
           <div className="profile-info">
             <h2>Profile Information</h2>
-            <div className="profile-picture">
-              <img
-                src={user.profilePicture || 'https://via.placeholder.com/150'}
-                alt="Profile"
+            <div className="profile-picture-container">
+              <div className="profile-picture">
+                <img
+                  src={profilePic || user.profilePicture || 'https://via.placeholder.com/150'}
+                  alt="Profile"
+                />
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{ marginTop: '10px', display: 'block' }}
+                id="profile-picture-upload"
               />
-              <input type="file" onChange={handleProfilePictureChange} />
+              <label htmlFor="profile-picture-upload" className="upload-button">
+              </label>
             </div>
             <div className="profile-details">
-              {isEditing ? (
-                <>
-                  <input
-                    type="text"
-                    value={user.name}
-                    onChange={(e) => setUser({ ...user, name: e.target.value })}
-                    placeholder="Full Name"
-                  />
-                  <input
-                    type="email"
-                    value={user.email}
-                    onChange={(e) => setUser({ ...user, email: e.target.value })}
-                    placeholder="Email"
-                  />
-                  <input
-                    type="text"
-                    value={user.contact}
-                    onChange={(e) => setUser({ ...user, contact: e.target.value })}
-                    placeholder="Contact Number"
-                  />
-                  <input
-                    type="text"
-                    value={user.university}
-                    onChange={(e) => setUser({ ...user, university: e.target.value })}
-                    placeholder="University"
-                  />
-                  <input
-                    type="text"
-                    value={user.address}
-                    onChange={(e) => setUser({ ...user, address: e.target.value })}
-                    placeholder="Address"
-                  />
-                </>
-              ) : (
-                <>
-                  <input type="text" value={user.name} readOnly placeholder="Full Name" />
-                  <input type="email" value={user.email} readOnly placeholder="Email" />
-                  <input type="text" value={user.contact} readOnly placeholder="Contact Number" />
-                  <input type="text" value={user.university} readOnly placeholder="University" />
-                  <input type="text" value={user.address} readOnly placeholder="Address" />
-                </>
-              )}
+              <input type="text" value={user.name} readOnly placeholder="Full Name" />
+              <input type="email" value={user.email} readOnly placeholder="Email" />
+              <input type="text" value={user.contact} readOnly placeholder="Contact Number" />
+              <input type="text" value={user.institute} readOnly placeholder="Institute" />
+              <input type="text" value={user.state} readOnly placeholder="State" />
+              <input type="text" value={user.city} readOnly placeholder="City" />
             </div>
-            <button
-              className="edit-profile-btn"
-              onClick={isEditing ? handleSaveProfile : handleEditProfile}
-            >
-              {isEditing ? 'Save Profile' : 'Edit Profile'}
-            </button>
-            {isEditing && (
-              <button className="cancel-profile-btn" onClick={handleCancelEdit}>
-                Cancel
-              </button>
-            )}
           </div>
         )}
 
         {activeTab === 'listings' && (
           <div className="user-listings">
             <h2>My Listings</h2>
-
             <div className="listings-container">
               <h3>Active Listings</h3>
               {listings.active.length > 0 ? (
@@ -204,65 +192,12 @@ const Dashboard = () => {
                   <div key={listing.id} className="listing-item">
                     <h4>{listing.name}</h4>
                     <p>Price: {listing.price}</p>
-                    <p>Description: {listing.description}</p>
-                    <p>Status: {listing.status}</p>
-                    <p>Date Listed: {listing.date}</p>
-                    <div className="listing-actions">
-                      <button onClick={() => handleListingAction(listing.id, 'Edit')}>Edit</button>
-                      <button onClick={() => handleListingAction(listing.id, 'Delete')}>Delete</button>
-                      {listing.status !== 'Sold' && (
-                        <button onClick={() => handleListingAction(listing.id, 'Mark as Sold')}>
-                          Mark as Sold
-                        </button>
-                      )}
-                    </div>
                   </div>
                 ))
               ) : (
                 <p>No active listings</p>
               )}
             </div>
-
-            <div className="listings-container">
-              <h3>Sold Listings</h3>
-              {listings.sold.length > 0 ? (
-                listings.sold.map((listing) => (
-                  <div key={listing.id} className="listing-item">
-                    <h4>{listing.name}</h4>
-                    <p>Price: {listing.price}</p>
-                    <p>Description: {listing.description}</p>
-                    <p>Status: {listing.status}</p>
-                    <p>Date Sold: {listing.date}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No sold listings</p>
-              )}
-            </div>
-
-            <div className="listings-container">
-              <h3>Bought Listings</h3>
-              {listings.bought.length > 0 ? (
-                listings.bought.map((listing) => (
-                  <div key={listing.id} className="listing-item">
-                    <h4>{listing.name}</h4>
-                    <p>Price: {listing.price}</p>
-                    <p>Description: {listing.description}</p>
-                    <p>Seller: {listing.sellerName}</p>
-                    <p>Date Purchased: {listing.date}</p>
-                  </div>
-                ))
-              ) : (
-                <p>No purchased listings</p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="settings">
-            <h2>Settings</h2>
-            {/* Settings content */}
           </div>
         )}
       </div>
@@ -271,5 +206,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
 
